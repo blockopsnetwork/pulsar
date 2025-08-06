@@ -1,0 +1,38 @@
+{
+  "name": "starknet-sepolia-starter",
+  "version": "0.0.1",
+  "description": "This project can be use as a starting point for developing your new Starknet Sepolia SubQuery project",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "subql codegen && subql build",
+    "codegen": "subql codegen",
+    "start:docker": "docker-compose pull && docker-compose up --remove-orphans",
+    "dev": "subql codegen && subql build && docker-compose pull && docker-compose up --remove-orphans",
+    "prepack": "rm -rf dist && npm run build",
+    "test": "subql build && subql-node-starknet test",
+    "build:develop": "NODE_ENV=develop subql codegen && NODE_ENV=develop subql build"
+  },
+  "homepage": "https://github.com/subquery/starknet-subql-starter",
+  "repository": "github:subquery/starknet-subql-starter",
+  "files": [
+    "dist",
+    "schema.graphql",
+    "project.yaml"
+  ],
+  "author": "SubQuery Team",
+  "license": "MIT",
+  "dependencies": {
+    "@subql/types-starknet": "latest",
+    "node-fetch": "2.6.7",
+    "starknet": "latest",
+    "text-encoding": "^0.7.0"
+  },
+  "devDependencies": {
+    "@subql/cli": "latest",
+    "@subql/testing": "latest",
+    "@types/node-fetch": "^2.6.12",
+    "@types/text-encoding": "^0.0.40",
+    "dotenv": "latest",
+    "typescript": "latest"
+  }
+}
