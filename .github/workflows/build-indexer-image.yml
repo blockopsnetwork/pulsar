@@ -1,0 +1,52 @@
+name: Build Docker Indexer Images to Docker Hub
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include: 
+          - name: bash
+            image: bash:5.2.32-alpine3.20
+            version: 5.2.32-alpine3.20
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Docker Buildx
+        uses: docker/setup-buildx-action@v3
+      - name: Set Tags
+        if: github.ref == 'refs/heads/main'
+        run: |
+          echo 'extra_tags="type=raw,value=${{ matrix.version }}"' >> "$GITHUB_ENV"
+      - name: Docker Metadata Action
+        uses: docker/metadata-action@v3.3.0
+        id: meta
+        with: 
+          images: ghcr.io/blockops-sh/images/${{ matrix.name }}
+          tags: | 
+            type=ref,event=branch
+            type=ref,event=pr
+            type=semver,pattern={{version}}
+            type=sha
+            ${{ env.extra_tags }}
+      - name: Authneticate to GHCR
+        uses: docker/login-action@v2
+        with: 
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Build and Push
+        uses: docker/build-push-action@v3
+        with:
+          context: ./utils/docker-images/${{ matrix.name }}
+          file: utils/docker-images/${{ matrix.name }}/Dockerfile
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          build-args: |
+            VERSION=${{ matrix.version }}
